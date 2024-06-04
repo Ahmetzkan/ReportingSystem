@@ -10,8 +10,6 @@ namespace Business.Messages
     {
         public static string DataNotFound = "Data is not found.";
         public static string DataAvailable = "This data is in use.";
-        public static string NotAssignedToOccupationClass = "You have not been assigned to a class yet.";
-        public static string JoinedSession = "You have attended this session before.";
 
         public static string UserNotFound = "User not found.";
         public static string SuccessfulLogin = "Login is succesful.";

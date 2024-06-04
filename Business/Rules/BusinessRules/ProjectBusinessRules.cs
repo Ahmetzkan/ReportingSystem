@@ -22,8 +22,8 @@ namespace Business.Rules.BusinessRules
         {
             var result = await _projectDal.GetAsync(
                 predicate: p => p.Id == projectId,
-                enableTracking: false
-                );
+                enableTracking: false);
+
             if (result == null)
             {
                 throw new BusinessException(BusinessMessages.DataNotFound);

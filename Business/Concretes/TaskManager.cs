@@ -1,18 +1,12 @@
 ﻿using AutoMapper;
 using Business.Abstracts;
 using Business.Dtos.Requests.TaskRequests;
-using Business.Dtos.Requests.TaskRequests;
-using Business.Dtos.Responses.TaskResponses;
 using Business.Dtos.Responses.TaskResponses;
 using Business.Rules.BusinessRules;
 using Core.DataAccess.Paging;
 using DataAccess.Abstracts;
 using Entities.Concretes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Task = Entities.Concretes.Task;
 
 namespace Business.Concretes
@@ -37,6 +31,7 @@ namespace Business.Concretes
             CreatedTaskResponse createdTaskResponse = _mapper.Map<CreatedTaskResponse>(createdTask);
             return createdTaskResponse;
         }
+
         public async Task<DeletedTaskResponse> DeleteAsync(Guid id)
         {
             await _taskBusinessRules.IsExistsTask(id);
@@ -63,11 +58,12 @@ namespace Business.Concretes
             var mappedTasks = _mapper.Map<Paginate<GetListTaskResponse>>(tasks);
             return mappedTasks;
         }
+
         public async Task<GetListTaskResponse> GetByIdAsync(Guid Id)
         {
-            var tasks = await _taskDal.GetAsync(p => p.Id == Id);
-            var mappedTasks = _mapper.Map<GetListTaskResponse>(tasks);
-            return mappedTasks;
+            var task = await _taskDal.GetAsync(p => p.Id == Id);
+            var mappedTask = _mapper.Map<GetListTaskResponse>(task);
+            return mappedTask;
         }
     }
 }

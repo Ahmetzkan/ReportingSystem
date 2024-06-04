@@ -1,4 +1,5 @@
 ﻿using Business.Messages;
+using Core.Business.Rules;
 using DataAccess.Abstracts;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Business.Rules.BusinessRules
 {
-    public class TaskBusinessRules
+    public class TaskBusinessRules : BaseBusinessRules
     {
         private readonly ITaskDal _taskDal;
 
@@ -21,8 +22,8 @@ namespace Business.Rules.BusinessRules
         {
             var result = await _taskDal.GetAsync(
                 predicate: p => p.Id == taskId,
-                enableTracking: false
-                );
+                enableTracking: false);
+
             if (result == null)
             {
                 throw new BusinessException(BusinessMessages.DataNotFound);

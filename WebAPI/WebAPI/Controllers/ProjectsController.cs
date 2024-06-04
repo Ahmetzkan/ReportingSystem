@@ -1,5 +1,8 @@
 ﻿using Business.Abstracts;
 using Business.Dtos.Requests.ProjectRequests;
+using Core.CrossCuttingConcerns.Caching;
+using Core.CrossCuttingConcerns.Logging;
+using Core.CrossCuttingConcerns.Logging.SeriLog.Logger;
 using Core.DataAccess.Paging;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,10 +19,10 @@ namespace WebAPI.Controllers
             _projectService = projectService;
         }
 
-
-        //[Logging(typeof(MsSqlLogger))]
-        //[Logging(typeof(FileLogger))]
-        //[Cache(60)]
+        
+        [Logging(typeof(MsSqlLogger))]
+        [Logging(typeof(FileLogger))]
+        [Cache(60)]
         [HttpGet("GetList")]
         public async Task<IActionResult> GetListAsync([FromQuery] PageRequest pageRequest)
         {
@@ -28,9 +31,9 @@ namespace WebAPI.Controllers
         }
 
 
-        //[Logging(typeof(MsSqlLogger))]
-        //[Logging(typeof(FileLogger))]
-        //[Cache]
+        [Logging(typeof(MsSqlLogger))]
+        [Logging(typeof(FileLogger))]
+        [Cache]
         [HttpGet("GetById")]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
@@ -39,9 +42,9 @@ namespace WebAPI.Controllers
         }
 
 
-        //[Logging(typeof(MsSqlLogger))]
-        //[Logging(typeof(FileLogger))]
-        //[CacheRemove("Projects.Get")]
+        [Logging(typeof(MsSqlLogger))]
+        [Logging(typeof(FileLogger))]
+        [CacheRemove("Projects.Get")]
         [HttpPost("Add")]
         public async Task<IActionResult> AddAsync([FromBody] CreateProjectRequest createProjectRequest)
         {
@@ -50,9 +53,9 @@ namespace WebAPI.Controllers
         }
 
 
-        //[Logging(typeof(MsSqlLogger))]
-        //[Logging(typeof(FileLogger))]
-        //[CacheRemove("Projects.Get")]
+        [Logging(typeof(MsSqlLogger))]
+        [Logging(typeof(FileLogger))]
+        [CacheRemove("Projects.Get")]
         [HttpPost("Update")]
         public async Task<IActionResult> UpdateAsync([FromBody] UpdateProjectRequest updateProjectRequest)
         {
@@ -60,9 +63,9 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
-        //[Logging(typeof(MsSqlLogger))]
-        //[Logging(typeof(FileLogger))]
-        //[CacheRemove("Projects.Get")]
+        [Logging(typeof(MsSqlLogger))]
+        [Logging(typeof(FileLogger))]
+        [CacheRemove("Projects.Get")]
         [HttpPost("Delete")]
         public async Task<IActionResult> DeleteAsync([FromBody] Guid id)
         {
