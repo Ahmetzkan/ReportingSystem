@@ -14,7 +14,7 @@ namespace Business.Abstracts
     {
         Task<CreatedTaskResponse> AddAsync(CreateTaskRequest createTaskRequest);
         Task<UpdatedTaskResponse> UpdateAsync(UpdateTaskRequest updateTaskRequest);
-        Task<DeletedTaskResponse> DeleteAsync(Guid id);
+        Task<DeletedTaskResponse> DeleteAsync(DeleteTaskRequest deleteTaskRequest);
         Task<IPaginate<GetListTaskResponse>> GetListAsync(PageRequest pageRequest);
         Task<GetListTaskResponse> GetByIdAsync(Guid Id);
     }

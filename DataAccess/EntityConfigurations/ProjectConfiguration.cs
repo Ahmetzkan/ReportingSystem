@@ -21,8 +21,12 @@ namespace DataAccess.EntityConfigurations
             builder.Property(p => p.EndDate).HasColumnName("EndDate").IsRequired();
             builder.Property(p => p.Status).HasColumnName("Status").IsRequired();
 
-            builder.HasIndex(indexExpression: t => t.Id, name: "UK_Id").IsUnique();
-            builder.HasQueryFilter(p=> !p.DeletedDate.HasValue);
+            builder.HasMany(p => p.Reports)
+            .WithOne(p => p.Project)
+            .HasForeignKey(p => p.ProjectId);
+
+            builder.HasIndex(indexExpression: p => p.Id, name: "UK_Id").IsUnique();
+            builder.HasQueryFilter(p => !p.DeletedDate.HasValue);
         }
     }
 }

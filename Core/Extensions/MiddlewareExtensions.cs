@@ -10,7 +10,6 @@ public static class MiddlewareExtensions
     public static void ConfigureCustomExceptionMiddleware(this IApplicationBuilder app)
         => app.
         UseMiddleware<ExceptionMiddleware>().
-        UseMiddleware<AuthorizationMiddleware>().
         UseMiddleware<ValidationMiddleware>().
         UseMiddleware<CacheMiddleware>().
         UseMiddleware<SeriLogMiddleware>().

@@ -1,6 +1,7 @@
 ﻿namespace WebAPI.Controllers
 {
     using Business.Abstracts;
+    using Business.Dtos.Requests.ProjectRequests;
     using Business.Dtos.Requests.TaskRequests;
     using Core.CrossCuttingConcerns.Caching;
     using Core.CrossCuttingConcerns.Logging;
@@ -58,7 +59,7 @@
             [Logging(typeof(MsSqlLogger))]
             [Logging(typeof(FileLogger))]
             [CacheRemove("Tasks.Get")]
-            [HttpPost("Update")]
+            [HttpPut("Update")]
             public async Task<IActionResult> UpdateAsync([FromBody] UpdateTaskRequest updateTaskRequest)
             {
                 var result = await _taskService.UpdateAsync(updateTaskRequest);
@@ -68,10 +69,10 @@
             [Logging(typeof(MsSqlLogger))]
             [Logging(typeof(FileLogger))]
             [CacheRemove("Tasks.Get")]
-            [HttpPost("Delete")]
-            public async Task<IActionResult> DeleteAsync([FromBody] Guid id)
+            [HttpDelete("Delete")]
+            public async Task<IActionResult> DeleteAsync([FromBody] DeleteTaskRequest deleteTaskRequest)
             {
-                var result = await _taskService.DeleteAsync(id);
+                var result = await _taskService.DeleteAsync(deleteTaskRequest);
                 return Ok(result);
             }
         }

@@ -46,6 +46,7 @@ where TEntity : Entity<TEntityId>
         CancellationToken cancellationToken = default
     );
 
+
     Task<TEntity> AddAsync(TEntity entity);
 
     Task<ICollection<TEntity>> AddRangeAsync(ICollection<TEntity> entity);

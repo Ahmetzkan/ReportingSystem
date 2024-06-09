@@ -32,10 +32,10 @@ namespace Business.Concretes
             return createdTaskResponse;
         }
 
-        public async Task<DeletedTaskResponse> DeleteAsync(Guid id)
+        public async Task<DeletedTaskResponse> DeleteAsync(DeleteTaskRequest deleteTaskRequest)
         {
-            await _taskBusinessRules.IsExistsTask(id);
-            Task task = await _taskDal.GetAsync(predicate: l => l.Id == id);
+            await _taskBusinessRules.IsExistsTask(deleteTaskRequest.Id);
+            Task task = await _taskDal.GetAsync(predicate: t => t.Id == deleteTaskRequest.Id);
             Task deletedTask = await _taskDal.DeleteAsync(task);
             DeletedTaskResponse deletedTaskResponse = _mapper.Map<DeletedTaskResponse>(deletedTask);
             return deletedTaskResponse;
@@ -61,7 +61,7 @@ namespace Business.Concretes
 
         public async Task<GetListTaskResponse> GetByIdAsync(Guid Id)
         {
-            var task = await _taskDal.GetAsync(p => p.Id == Id);
+            var task = await _taskDal.GetAsync(t => t.Id == Id);
             var mappedTask = _mapper.Map<GetListTaskResponse>(task);
             return mappedTask;
         }

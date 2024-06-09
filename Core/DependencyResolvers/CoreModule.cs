@@ -16,8 +16,8 @@ public class CoreModule : ICoreModule
 
 
         services.AddSingleton<ICachingService, InMemoryCacheManager>();
-        services.AddTransient<MsSqlLogger>();
-        services.AddTransient<FileLogger>();
+        services.AddScoped<MsSqlLogger>();
+        services.AddSingleton<FileLogger>();
         services.AddSingleton(Log.Logger);
 
         services.AddSingleton<Stopwatch>();

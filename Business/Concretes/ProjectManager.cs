@@ -35,10 +35,10 @@ namespace Business.Concretes
             return createdProjectResponse;
         }
 
-        public async Task<DeletedProjectResponse> DeleteAsync(Guid id)
+        public async Task<DeletedProjectResponse> DeleteAsync(DeleteProjectRequest deleteProjectRequest)
         {
-            await _projectBusinessRules.IsExistsProject(id);
-            Project project = await _projectDal.GetAsync(predicate: l => l.Id == id);
+            await _projectBusinessRules.IsExistsProject(deleteProjectRequest.Id);
+            Project project = await _projectDal.GetAsync(predicate: p => p.Id == deleteProjectRequest.Id);
             Project deletedProject = await _projectDal.DeleteAsync(project);
             DeletedProjectResponse deletedProjectResponse = _mapper.Map<DeletedProjectResponse>(deletedProject);
             return deletedProjectResponse;

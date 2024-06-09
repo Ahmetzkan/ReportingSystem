@@ -8,6 +8,7 @@ using DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +19,6 @@ builder.Services.AddControllers()
             options.JsonSerializerOptions.ReferenceHandler =
             ReferenceHandler.IgnoreCycles;
         });
-
 
 builder.Services.AddCors(options =>
 {
@@ -55,8 +55,7 @@ builder.Services.AddSwaggerGen(opt =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description =
-            "Please enter token"
+        Description = "Please enter token"
     });
     opt.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -82,7 +81,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Enter JWT Bearer token **_only_**",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
-        Scheme = "bearer", 
+        Scheme = "bearer",
         BearerFormat = "JWT",
         Reference = new OpenApiReference
         {
@@ -97,7 +96,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -106,12 +104,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.ConfigureCustomExceptionMiddleware();
 app.UseRouting();
 app.UseCors("myPolicy");
+app.UseAuthentication();
 app.UseAuthorization();
+app.ConfigureCustomExceptionMiddleware();
 app.MapControllers();
+
 app.Run();

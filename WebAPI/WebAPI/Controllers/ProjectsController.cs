@@ -19,7 +19,6 @@ namespace WebAPI.Controllers
             _projectService = projectService;
         }
 
-        
         [Logging(typeof(MsSqlLogger))]
         [Logging(typeof(FileLogger))]
         [Cache(60)]
@@ -29,7 +28,6 @@ namespace WebAPI.Controllers
             var result = await _projectService.GetListAsync(pageRequest);
             return Ok(result);
         }
-
 
         [Logging(typeof(MsSqlLogger))]
         [Logging(typeof(FileLogger))]
@@ -41,7 +39,6 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
-
         [Logging(typeof(MsSqlLogger))]
         [Logging(typeof(FileLogger))]
         [CacheRemove("Projects.Get")]
@@ -52,11 +49,10 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
-
         [Logging(typeof(MsSqlLogger))]
         [Logging(typeof(FileLogger))]
         [CacheRemove("Projects.Get")]
-        [HttpPost("Update")]
+        [HttpPut("Update")]
         public async Task<IActionResult> UpdateAsync([FromBody] UpdateProjectRequest updateProjectRequest)
         {
             var result = await _projectService.UpdateAsync(updateProjectRequest);
@@ -66,10 +62,10 @@ namespace WebAPI.Controllers
         [Logging(typeof(MsSqlLogger))]
         [Logging(typeof(FileLogger))]
         [CacheRemove("Projects.Get")]
-        [HttpPost("Delete")]
-        public async Task<IActionResult> DeleteAsync([FromBody] Guid id)
+        [HttpDelete("Delete")]
+        public async Task<IActionResult> DeleteAsync([FromBody] DeleteProjectRequest deleteProjectRequest)
         {
-            var result = await _projectService.DeleteAsync(id);
+            var result = await _projectService.DeleteAsync(deleteProjectRequest);
             return Ok(result);
         }
     }

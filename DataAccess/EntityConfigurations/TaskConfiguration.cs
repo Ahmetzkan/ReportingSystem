@@ -21,6 +21,10 @@ namespace DataAccess.EntityConfigurations
                 builder.Property(t => t.Description).HasColumnName("Description").IsRequired();
                 builder.Property(t => t.Status).HasColumnName("Status").IsRequired();
 
+                builder.HasMany(t => t.Reports)
+                 .WithOne(t => t.Task)
+                 .HasForeignKey(t => t.TaskId);
+
                 builder.HasIndex(indexExpression: t => t.Id, name: "UK_Id").IsUnique();
                 builder.HasQueryFilter(t => !t.DeletedDate.HasValue);
             }

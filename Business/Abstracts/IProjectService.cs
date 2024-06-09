@@ -13,7 +13,7 @@ namespace Business.Abstracts
     {
         Task<CreatedProjectResponse> AddAsync(CreateProjectRequest createProjectRequest);
         Task<UpdatedProjectResponse> UpdateAsync(UpdateProjectRequest updateProjectRequest);
-        Task<DeletedProjectResponse> DeleteAsync(Guid id);
+        Task<DeletedProjectResponse> DeleteAsync(DeleteProjectRequest deletedProjectRequest);
         Task<IPaginate<GetListProjectResponse>> GetListAsync(PageRequest pageRequest);
         Task<GetListProjectResponse> GetByIdAsync(Guid Id);
 

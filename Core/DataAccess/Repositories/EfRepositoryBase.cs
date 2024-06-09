@@ -47,11 +47,21 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext> : IAsyncRepository<T
 
     public async Task<TEntity> UpdateAsync(TEntity entity)
     {
-        entity.UpdatedDate = DateTime.UtcNow;
-        Context.Update(entity);
-        await Context.SaveChangesAsync();
+        TEntity existingEntity = await Context.Set<TEntity>().FindAsync(entity.Id);
+
+        if (existingEntity != null)
+        {
+            entity.UpdatedDate = DateTime.UtcNow;
+
+            entity.CreatedDate = existingEntity.CreatedDate;
+
+            Context.Entry(existingEntity).CurrentValues.SetValues(entity);
+            await Context.SaveChangesAsync();
+        }
+
         return entity;
     }
+
 
     public async Task<ICollection<TEntity>> UpdateRangeAsync(ICollection<TEntity> entities)
     {

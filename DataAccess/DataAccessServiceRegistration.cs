@@ -18,8 +18,13 @@ namespace DataAccess
         {
             services.AddDbContext<ReportingSystemContext>(options => options.UseSqlServer(configuration.GetConnectionString("ReportingSystemContext")));
 
+            services.AddScoped<IUserDal, EfUserDal>();
+            services.AddScoped<IOperationClaimDal, EfOperationClaimDal>();
+            services.AddScoped<IUserOperationClaimDal, EfUserOperationClaimDal>();
+
             services.AddScoped<IProjectDal, EfProjectDal>();
             services.AddScoped<ITaskDal, EfTaskDal>();
+            services.AddScoped<IReportDal, EfReportDal>();
 
             return services;
         }

@@ -16,9 +16,9 @@ namespace Business.Rules.ValidationRules.FluentValidation.TaskValidators
             RuleFor(t => t.Description).NotEmpty();
             RuleFor(t => t.Status).NotEmpty();
 
-            RuleFor(p => p.Title).MinimumLength(4);
-            RuleFor(p => p.Description).MinimumLength(2);
-            RuleFor(p => p.Status).MinimumLength(5);
+            RuleFor(t => t.Title).MinimumLength(4);
+            RuleFor(t => t.Description).MinimumLength(2);
+            RuleFor(t => t.Status).MinimumLength(5);
         }
     }
 }
