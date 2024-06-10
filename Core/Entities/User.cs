@@ -11,5 +11,7 @@ public class User : Entity<Guid>
     public byte[] PasswordHash { get; set; }
     public string? PasswordReset { get; set; }
     public bool Status { get; set; }
+    public string TcNo { get; set; }
+    public DateTime BirthDate { get; set; }
     public ICollection<UserOperationClaim> UserOperationClaims { get; set; }
 }

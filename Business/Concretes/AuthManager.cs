@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Business.Abstracts;
 using Business.Dtos.Requests.AuthRequests;
+using Business.Dtos.Requests.OperationClaimRequests;
 using Business.Dtos.Requests.UserOperationClaimRequests;
 using Business.Dtos.Requests.UserRequests;
 using Business.Dtos.Responses.AuthResponses;
@@ -10,7 +11,9 @@ using Business.Rules.BusinessRules;
 using Core.Entities;
 using Core.Utilities.Security.Hashing;
 using Core.Utilities.Security.JWT;
+using Kps;
 using Microsoft.AspNetCore.WebUtilities;
+using System.ServiceModel;
 using System.Text;
 
 namespace Business.Concretes;
@@ -22,10 +25,9 @@ public class AuthManager : IAuthService
     private IMapper _mapper;
     private IUserOperationClaimService _userOperationClaimService;
     private IOperationClaimService _operationClaimService;
-
     private UserBusinessRules _userBusinessRules;
 
-    public AuthManager(IUserService userService, ITokenHelper tokenHelper, IMapper mapper, UserBusinessRules userBusinessRules,IUserOperationClaimService userOperationClaimService, IOperationClaimService operationClaimService)
+    public AuthManager(IUserService userService, ITokenHelper tokenHelper, IMapper mapper, UserBusinessRules userBusinessRules, IUserOperationClaimService userOperationClaimService, IOperationClaimService operationClaimService, KPSPublicSoapClient kPSPublicSoapClient)
     {
         _userService = userService;
         _tokenHelper = tokenHelper;
@@ -38,6 +40,8 @@ public class AuthManager : IAuthService
     public async Task<LoginResponse> Register(RegisterAuthRequest registerAuthRequest, string password)
     {
         await _userBusinessRules.IsExistsUserMail(registerAuthRequest.Email);
+        await _userBusinessRules.VerifyTcKimlikNo(registerAuthRequest);
+
         User user = _mapper.Map<User>(registerAuthRequest);
 
         byte[] passwordHash, passwordSalt;
@@ -53,13 +57,15 @@ public class AuthManager : IAuthService
         User mappedUser = _mapper.Map<User>(getUserResponse);
 
 
-
         GetListOperationClaimResponse operationClaim = await _operationClaimService.GetByRoleName(Roles.User);
+
+        var operationClaimId = operationClaim?.Id ?? (
+        await _operationClaimService.AddAsync(new CreateOperationClaimRequest { Name = "User" })).Id;
 
         await _userOperationClaimService.AddAsync(new CreateUserOperationClaimRequest
         {
             UserId = addedUser.Id,
-            OperationClaimId = operationClaim.Id
+            OperationClaimId = operationClaimId
         });
 
         var result = await CreateAccessToken(mappedUser);

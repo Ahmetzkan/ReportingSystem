@@ -17,5 +17,9 @@ namespace Business.Messages
         public static string UserRegistered = "Register is succesful.";
         public static string AccessTokenCreated = "Token is created.";
         public static string AuthorizationDenied = "You dont have a authorization.";
+
+        public static string TcNumberVerifiy = "Tc number authentication failed.";
+
+
     }
 }

@@ -10,6 +10,8 @@ using Core.Business.Rules;
 using Business.Concretes;
 using Business.Abstracts;
 using Core.Utilities.Security.JWT;
+using Kps;
+using System.ServiceModel;
 
 
 namespace Business
@@ -27,6 +29,14 @@ namespace Business
             services.AddScoped<IProjectService, ProjectManager>();
             services.AddScoped<ITaskService, TaskManager>();
             services.AddScoped<IReportService, ReportManager>();
+
+
+            services.AddScoped<KPSPublicSoapClient>(provider =>
+            {
+                var endpoint = new EndpointAddress("https://tckimlik.nvi.gov.tr/Service/KPSPublic.asmx");
+                var binding = new BasicHttpBinding(BasicHttpSecurityMode.Transport);
+                return new KPSPublicSoapClient(binding, endpoint);
+            });
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddSubClassesOfType(Assembly.GetExecutingAssembly(), typeof(BaseBusinessRules));

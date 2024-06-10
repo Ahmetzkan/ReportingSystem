@@ -1,15 +1,17 @@
 ﻿using Core.Entities;
 using Entities.Concretes;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using System.Data;
 using System.Reflection;
 
 namespace DataAccess.Contexts
 {
     public class ReportingSystemContext : DbContext
     {
-        protected IConfiguration Configuration { get; set; }
+        protected IConfiguration _configuration { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<OperationClaim> OperationClaims { get; set; }
         public DbSet<UserOperationClaim> UserOperationClaims { get; set; }
@@ -21,8 +23,12 @@ namespace DataAccess.Contexts
 
         public ReportingSystemContext(DbContextOptions dbContextOptions, IConfiguration configuration) : base(dbContextOptions)
         {
-            Configuration = configuration;
+            _configuration = configuration;
             Database.EnsureCreated();
+        }
+
+        public ReportingSystemContext()
+        {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,7 +38,7 @@ namespace DataAccess.Contexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;initial Catalog=ReportingSystemDb;integrated Security = true");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=ReportingSystemDb;integrated security=true;Trusted_Connection=True;TrustServerCertificate=True");
         }
     }
 }

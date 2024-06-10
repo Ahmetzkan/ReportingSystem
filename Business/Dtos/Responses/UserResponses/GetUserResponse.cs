@@ -10,4 +10,6 @@ public class GetUserResponse
     public byte[] PasswordSalt { get; set; }
     public byte[] PasswordHash { get; set; }
     public bool Status { get; set; }
+    public string TcNo { get; set; }
+    public DateTime BirthDate { get; set; }
 }
