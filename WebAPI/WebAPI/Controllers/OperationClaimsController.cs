@@ -8,11 +8,8 @@ using Core.CrossCuttingConcerns.Validation;
 using Core.DataAccess.Paging;
 using DataAccess.Abstracts;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-
 namespace WebAPI.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OperationClaimsController : ControllerBase

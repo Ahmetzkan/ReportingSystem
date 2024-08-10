@@ -12,11 +12,7 @@ using Business.Abstracts;
 using Core.Utilities.Security.JWT;
 using Kps;
 using System.ServiceModel;
-using DataAccess.Abstracts;
-using DataAccess.Concretes;
-using Microsoft.AspNetCore.Hosting;
 using Core.Utilities.Security.Jwt;
-using Business.Rules.BusinessRules;
 
 
 namespace Business
