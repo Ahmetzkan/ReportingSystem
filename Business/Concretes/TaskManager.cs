@@ -5,8 +5,6 @@ using Business.Dtos.Responses.TaskResponses;
 using Business.Rules.BusinessRules;
 using Core.DataAccess.Paging;
 using DataAccess.Abstracts;
-using Entities.Concretes;
-using System;
 using Task = Entities.Concretes.Task;
 
 namespace Business.Concretes

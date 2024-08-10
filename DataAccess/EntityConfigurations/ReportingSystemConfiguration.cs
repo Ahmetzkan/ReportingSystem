@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DataAccess.EntityConfigurations
 {
-    public class ReportingSystemContext : IEntityTypeConfiguration<Report>
+    public class ReportingSystemConfiguration : IEntityTypeConfiguration<Report>
     {
         public void Configure(EntityTypeBuilder<Report> builder)
         {

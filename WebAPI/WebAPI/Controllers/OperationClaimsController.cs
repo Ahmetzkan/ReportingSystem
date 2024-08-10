@@ -4,18 +4,15 @@ using Business.Rules.ValidationRules.FluentValidation.OperationClaimValidators;
 using Core.CrossCuttingConcerns.Caching;
 using Core.CrossCuttingConcerns.Logging.SeriLog.Logger;
 using Core.CrossCuttingConcerns.Logging;
-using Core.CrossCuttingConcerns.Logging.SeriLog.Logger;
 using Core.CrossCuttingConcerns.Validation;
 using Core.DataAccess.Paging;
 using DataAccess.Abstracts;
 using Microsoft.AspNetCore.Mvc;
-using Core.CrossCuttingConcerns.Validation;
-using Business.Dtos.Requests.OperationClaimRequests;
-using Business.Rules.ValidationRules.FluentValidation.OperationClaimValidators;
 using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OperationClaimsController : ControllerBase

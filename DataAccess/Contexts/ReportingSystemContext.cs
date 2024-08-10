@@ -18,17 +18,13 @@ namespace DataAccess.Contexts
         public DbSet<Project> Projects { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Entities.Concretes.Task> Tasks { get; set; }
-
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
         public ReportingSystemContext(DbContextOptions dbContextOptions, IConfiguration configuration) : base(dbContextOptions)
         {
             _configuration = configuration;
             Database.EnsureCreated();
-        }
-
-        public ReportingSystemContext()
-        {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

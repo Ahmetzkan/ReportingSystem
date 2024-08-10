@@ -1,6 +1,7 @@
 ﻿using Business.Dtos.Requests.AuthRequests;
 using Business.Messages;
 using Core.Business.Rules;
+using Core.Entities;
 using DataAccess.Abstracts;
 using Kps;
 
@@ -8,7 +9,7 @@ namespace Business.Rules.BusinessRules;
 
 public class UserBusinessRules : BaseBusinessRules
 {
-    IUserDal _userDal;
+    private readonly IUserDal _userDal;
     private readonly KPSPublicSoapClient _kPSPublicSoapClient;
 
     public UserBusinessRules(IUserDal userDal, KPSPublicSoapClient kPSPublicSoapClient)
@@ -21,6 +22,20 @@ public class UserBusinessRules : BaseBusinessRules
     {
         var result = await _userDal.GetAsync(
             predicate: a => a.Id == userId,
+            enableTracking: false);
+
+        if (result == null)
+        {
+            throw new BusinessException(BusinessMessages.DataNotFound);
+        }
+    }
+
+    public async Task IsExistsResetToken(string resetToken)
+    {
+        var test = await _userDal.GetListAsync();
+
+        var result = await _userDal.GetAsync(
+            predicate: a => a.PasswordReset == resetToken,
             enableTracking: false);
 
         if (result == null)
@@ -62,20 +77,6 @@ public class UserBusinessRules : BaseBusinessRules
         if (result != null)
         {
             throw new BusinessException(BusinessMessages.DataAvailable);
-        }
-    }
-
-    public async Task IsExistsResetToken(string resetToken)
-    {
-        var test = await _userDal.GetListAsync();
-
-        var result = await _userDal.GetAsync(
-            predicate: a => a.PasswordReset == resetToken,
-            enableTracking: false);
-
-        if (result == null)
-        {
-            throw new BusinessException(BusinessMessages.DataNotFound);
         }
     }
 }

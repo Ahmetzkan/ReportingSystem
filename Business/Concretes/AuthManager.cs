@@ -2,6 +2,7 @@
 using Business.Abstracts;
 using Business.Dtos.Requests.AuthRequests;
 using Business.Dtos.Requests.OperationClaimRequests;
+using Business.Dtos.Requests.RefreshTokenRequests;
 using Business.Dtos.Requests.UserOperationClaimRequests;
 using Business.Dtos.Requests.UserRequests;
 using Business.Dtos.Responses.AuthResponses;
@@ -11,113 +12,129 @@ using Business.Rules.BusinessRules;
 using Core.Entities;
 using Core.Utilities.Security.Hashing;
 using Core.Utilities.Security.JWT;
-using Kps;
-using Microsoft.AspNetCore.WebUtilities;
-using System.ServiceModel;
-using System.Text;
+using DataAccess.Abstracts;
+using Microsoft.AspNetCore.Http;
 
-namespace Business.Concretes;
-
-public class AuthManager : IAuthService
+namespace Business.Concretes
 {
-    private IUserService _userService;
-    private ITokenHelper _tokenHelper;
-    private IMapper _mapper;
-    private IUserOperationClaimService _userOperationClaimService;
-    private IOperationClaimService _operationClaimService;
-    private UserBusinessRules _userBusinessRules;
-
-    public AuthManager(IUserService userService, ITokenHelper tokenHelper, IMapper mapper, UserBusinessRules userBusinessRules, IUserOperationClaimService userOperationClaimService, IOperationClaimService operationClaimService, KPSPublicSoapClient kPSPublicSoapClient)
+    public class AuthManager : IAuthService
     {
-        _userService = userService;
-        _tokenHelper = tokenHelper;
-        _mapper = mapper;
-        _userBusinessRules = userBusinessRules;
-        _userOperationClaimService = userOperationClaimService;
-        _operationClaimService = operationClaimService;
-    }
+        private readonly IUserService _userService;
+        private readonly IRefreshTokenService _refreshTokenService;
+        private readonly IMapper _mapper;
+        private readonly IUserOperationClaimService _userOperationClaimService;
+        private readonly IOperationClaimService _operationClaimService;
+        private readonly IRefreshTokenDal _refreshTokenDal;
+        private readonly ITokenHelper _tokenHelper;
+        private readonly UserBusinessRules _userBusinessRules;
 
-    public async Task<LoginResponse> Register(RegisterAuthRequest registerAuthRequest, string password)
-    {
-        await _userBusinessRules.IsExistsUserMail(registerAuthRequest.Email);
-        await _userBusinessRules.VerifyTcKimlikNo(registerAuthRequest);
-
-        User user = _mapper.Map<User>(registerAuthRequest);
-
-        byte[] passwordHash, passwordSalt;
-        HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
-        user.PasswordHash = passwordHash;
-        user.PasswordSalt = passwordSalt;
-
-        CreateUserRequest createUserRequest = _mapper.Map<CreateUserRequest>(user);
-
-        var addedUser = await _userService.AddAsync(createUserRequest);
-        var getUserResponse = await _userService.GetByIdAsync(addedUser.Id);
-
-        User mappedUser = _mapper.Map<User>(getUserResponse);
-
-
-        GetListOperationClaimResponse operationClaim = await _operationClaimService.GetByRoleName(Roles.User);
-
-        var operationClaimId = operationClaim?.Id ?? (
-        await _operationClaimService.AddAsync(new CreateOperationClaimRequest { Name = "User" })).Id;
-
-        await _userOperationClaimService.AddAsync(new CreateUserOperationClaimRequest
+        public AuthManager(IMapper mapper, UserBusinessRules userBusinessRules,
+            IUserOperationClaimService userOperationClaimService, IOperationClaimService operationClaimService, IRefreshTokenDal refreshTokenDal, ITokenHelper tokenHelper, IUserService userService, IRefreshTokenService refreshTokenService)
         {
-            UserId = addedUser.Id,
-            OperationClaimId = operationClaimId
-        });
+            _mapper = mapper;
+            _userBusinessRules = userBusinessRules;
+            _userOperationClaimService = userOperationClaimService;
+            _operationClaimService = operationClaimService;
+            _refreshTokenDal = refreshTokenDal;
+            _tokenHelper = tokenHelper;
+            _userService = userService;
+            _refreshTokenService = refreshTokenService;
+        }
 
-        var result = await CreateAccessToken(mappedUser);
-        return result;
-    }
+        public async Task<LoginResponse> Register(RegisterAuthRequest registerAuthRequest, string password, HttpContext httpContext)
+        {
+            await _userBusinessRules.IsExistsUserMail(registerAuthRequest.Email);
+            await _userBusinessRules.VerifyTcKimlikNo(registerAuthRequest);
 
-    public async Task<User> Login(LoginAuthRequest loginAuthRequest)
-    {
-        var user = await _userService.GetByMailAsync(loginAuthRequest.Email);
+            User user = _mapper.Map<User>(registerAuthRequest);
 
-        HashingHelper.VerifyPasswordHash(loginAuthRequest.Password, user.PasswordHash, user.PasswordSalt);
+            HashingHelper.CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
 
-        var mappedUser = _mapper.Map<User>(user);
-        return mappedUser;
-    }
+            CreateUserRequest createUserRequest = _mapper.Map<CreateUserRequest>(user);
 
-    public async Task<LoginResponse> CreateAccessToken(User user)
-    {
-        var claims = await _userService.GetClaimsAsync(user);
-        var mapped = _mapper.Map<List<OperationClaim>>(claims);
+            var addedUser = await _userService.AddAsync(createUserRequest);
+            var getUserResponse = await _userService.GetByIdAsync(addedUser.Id);
 
-        var accessToken = _tokenHelper.CreateToken(user, mapped);
-        LoginResponse loginResponse = _mapper.Map<LoginResponse>(accessToken);
+            User mappedUser = _mapper.Map<User>(getUserResponse);
 
-        return loginResponse;
-    }
+            GetListOperationClaimResponse operationClaim = await _operationClaimService.GetByRoleName(Roles.User);
 
-    public async Task ChangePassword(ChangePasswordRequest changePasswordRequest)
-    {
-        byte[] passwordHash, passwordSalt;
-        var userResponse = await _userService.GetByIdAsync(changePasswordRequest.UserId);
-        HashingHelper.VerifyPasswordHash(changePasswordRequest.OldPassword, userResponse.PasswordHash, userResponse.PasswordSalt);
-        HashingHelper.CreatePasswordHash(changePasswordRequest.NewPassword, out passwordHash, out passwordSalt);
+            var operationClaimId = operationClaim?.Id ?? (await _operationClaimService.AddAsync(new CreateOperationClaimRequest { Name = "User" })).Id;
 
-        User user = _mapper.Map<User>(userResponse);
-        user.PasswordHash = passwordHash;
-        user.PasswordSalt = passwordSalt;
-        user.Password = changePasswordRequest.NewPassword;
+            await _userOperationClaimService.AddAsync(new CreateUserOperationClaimRequest
+            {
+                UserId = addedUser.Id,
+                OperationClaimId = operationClaimId
+            });
 
-        await _userService.UpdatePasswordAsync(user);
-    }
+            var ipAddress = GetIpAddress(httpContext);
+            return await CreateAccessToken(mappedUser, ipAddress);
+        }
 
-    public async Task ChangeForgotPassword(ResetPasswordRequest resetPasswordRequest)
-    {
-        byte[] passwordHash, passwordSalt;
-        var userResponse = await _userService.GetByIdAsync(resetPasswordRequest.UserId);
-        HashingHelper.CreatePasswordHash(resetPasswordRequest.NewPassword, out passwordHash, out passwordSalt);
-        User user = _mapper.Map<User>(userResponse);
-        user.PasswordHash = passwordHash;
-        user.PasswordSalt = passwordSalt;
-        user.Password = resetPasswordRequest.NewPassword;
+        public async Task<User> Login(LoginAuthRequest loginAuthRequest)
+        {
+            var user = await _userService.GetByMailAsync(loginAuthRequest.Email);
+            HashingHelper.VerifyPasswordHash(loginAuthRequest.Password, user.PasswordHash, user.PasswordSalt);
 
-        await _userService.UpdatePasswordAsync(user);
+            await _refreshTokenService.DeleteOldRefreshTokens(user.Id);
+            return _mapper.Map<User>(user);
+        }
+
+        public async Task<LoginResponse> CreateAccessToken(User user, string ipAddress)
+        {
+            var claims = await _userService.GetClaimsAsync(user);
+            var mappedClaims = _mapper.Map<List<OperationClaim>>(claims);
+
+            var existingRefreshToken = await _refreshTokenDal.GetByTokenAsync(user.Id.ToString());
+            if (existingRefreshToken != null) { await _refreshTokenDal.DeleteAsync(existingRefreshToken); }
+
+            var accessToken = _tokenHelper.CreateToken(user, mappedClaims);
+            var refreshToken = _tokenHelper.GenerateRefreshToken(user.Id, ipAddress);
+
+            await _refreshTokenDal.AddAsync(refreshToken);
+
+            return new LoginResponse
+            {
+                Token = accessToken.Token,
+                RefreshToken = refreshToken.Token,
+                Expiration = accessToken.Expiration
+            };
+        }
+        public async Task ChangePassword(ChangePasswordRequest changePasswordRequest, CreateRefreshTokenRequest createRefreshTokenRequest)
+        {
+            var userResponse = await _userService.GetByIdAsync(changePasswordRequest.UserId);
+            HashingHelper.VerifyPasswordHash(changePasswordRequest.OldPassword, userResponse.PasswordHash, userResponse.PasswordSalt);
+            HashingHelper.CreatePasswordHash(changePasswordRequest.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+
+            User user = _mapper.Map<User>(userResponse);
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+            user.Password = changePasswordRequest.NewPassword;
+
+            await _userService.UpdatePasswordAsync(user, createRefreshTokenRequest);
+        }
+
+        public async Task ChangeForgotPassword(ResetPasswordRequest resetPasswordRequest, CreateRefreshTokenRequest createRefreshTokenRequest)
+        {
+            var userResponse = await _userService.GetByIdAsync(resetPasswordRequest.UserId);
+            HashingHelper.CreatePasswordHash(resetPasswordRequest.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+            User user = _mapper.Map<User>(userResponse);
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+            user.Password = resetPasswordRequest.NewPassword;
+
+            await _userService.UpdatePasswordAsync(user, createRefreshTokenRequest);
+        }
+
+        private string GetIpAddress(HttpContext httpContext)
+        {
+            string ipAddress = httpContext.Request.Headers.ContainsKey("X-Forwarded-For")
+                ? httpContext.Request.Headers["X-Forwarded-For"].ToString()
+                : httpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString()
+                    ?? throw new BusinessException(BusinessMessages.InvalidIp);
+            return ipAddress;
+        }
     }
 }

@@ -24,6 +24,7 @@ public class UserProfile : Profile
         CreateMap<User, LoginAuthRequest>().ReverseMap();
         CreateMap<User, RegisterAuthRequest>().ReverseMap();
         CreateMap<User, GetUserResponse>().ReverseMap();
+        CreateMap<GetUserResponse, User>();
 
         CreateMap<GetListUserResponse, User>()
         .ReverseMap()

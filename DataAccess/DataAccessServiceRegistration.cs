@@ -25,6 +25,7 @@ namespace DataAccess
             services.AddScoped<IProjectDal, EfProjectDal>();
             services.AddScoped<ITaskDal, EfTaskDal>();
             services.AddScoped<IReportDal, EfReportDal>();
+            services.AddScoped<IRefreshTokenDal, EfRefreshTokenDal>();
 
             return services;
         }

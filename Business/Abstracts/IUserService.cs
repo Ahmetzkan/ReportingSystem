@@ -1,4 +1,5 @@
-﻿using Business.Dtos.Requests.UserRequests;
+﻿using Business.Dtos.Requests.RefreshTokenRequests;
+using Business.Dtos.Requests.UserRequests;
 using Business.Dtos.Responses.UserResponses;
 using Core.DataAccess.Paging;
 using Core.Entities;
@@ -10,7 +11,7 @@ public interface IUserService
     Task<IPaginate<GetListUserResponse>> GetListAsync(PageRequest pageRequest);
     Task<CreatedUserResponse> AddAsync(CreateUserRequest createUserRequest);
     Task<UpdatedUserResponse> UpdateAsync(UpdateUserRequest updateUserRequest);
-    Task<UpdatedUserResponse> UpdatePasswordAsync(User user);
+    Task<UpdatedUserResponse> UpdatePasswordAsync(User user,CreateRefreshTokenRequest createRefreshTokenRequest);
     Task<UpdatedUserResponse> UpdateResetTokenAsync(ResetTokenUserRequest resetTokenUserRequest);
     Task<DeletedUserResponse> DeleteAsync(Guid id);
     Task<GetUserResponse> GetByIdAsync(Guid? id);

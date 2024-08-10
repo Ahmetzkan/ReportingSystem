@@ -12,6 +12,6 @@ public static class MiddlewareExtensions
         UseMiddleware<ExceptionMiddleware>().
         UseMiddleware<ValidationMiddleware>().
         UseMiddleware<CacheMiddleware>().
-        UseMiddleware<SeriLogMiddleware>().
-        UseMiddleware<AuthorizationMiddleware>();
+        UseMiddleware<AuthorizationMiddleware>().
+        UseMiddleware<SeriLogMiddleware>();
 } 
