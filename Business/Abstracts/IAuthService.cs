@@ -14,4 +14,6 @@ public interface IAuthService
     Task<LoginResponse> CreateAccessToken(User user, string ipAddress);
     Task ChangePassword(ChangePasswordRequest changePasswordRequest, CreateRefreshTokenRequest createRefreshTokenRequest);
     Task ChangeForgotPassword(ResetPasswordRequest resetPasswordRequest, CreateRefreshTokenRequest createRefreshTokenRequest);
+    Task<bool> PasswordResetAsync(string email);
+
 }

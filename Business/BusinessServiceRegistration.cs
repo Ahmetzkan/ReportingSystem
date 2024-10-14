@@ -13,6 +13,7 @@ using Core.Utilities.Security.JWT;
 using Kps;
 using System.ServiceModel;
 using Core.Utilities.Security.Jwt;
+using Core.Utilities.Helpers;
 
 
 namespace Business
@@ -25,14 +26,16 @@ namespace Business
             services.AddScoped<IUserService, UserManager>();
             services.AddScoped<ITokenHelper, JwtHelper>();
             services.AddScoped<IRefreshTokenService, RefreshTokenManager>();
+            services.AddScoped<IMailService, MailManager>();
 
             services.AddScoped<IOperationClaimService, OperationClaimManager>();
             services.AddScoped<IUserOperationClaimService, UserOperationClaimManager>();
-
             services.AddScoped<IProjectService, ProjectManager>();
             services.AddScoped<ITaskService, TaskManager>();
             services.AddScoped<IReportService, ReportManager>();
 
+            services.AddScoped<FileBusinessRules>();
+            services.AddScoped<IFileHelper, FileHelper>();
 
 
             services.AddScoped<KPSPublicSoapClient>(provider =>

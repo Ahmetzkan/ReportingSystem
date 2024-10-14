@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using Business.Abstracts;
 using Business.Dtos.Requests.AuthRequests;
+using Business.Dtos.Requests.MailRequests;
 using Business.Dtos.Requests.OperationClaimRequests;
 using Business.Dtos.Requests.RefreshTokenRequests;
 using Business.Dtos.Requests.UserOperationClaimRequests;
 using Business.Dtos.Requests.UserRequests;
 using Business.Dtos.Responses.AuthResponses;
 using Business.Dtos.Responses.OperationClaimResponses;
+using Business.Dtos.Responses.UserResponses;
 using Business.Messages;
 using Business.Rules.BusinessRules;
 using Core.Entities;
@@ -14,6 +16,8 @@ using Core.Utilities.Security.Hashing;
 using Core.Utilities.Security.JWT;
 using DataAccess.Abstracts;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace Business.Concretes
 {
@@ -24,12 +28,13 @@ namespace Business.Concretes
         private readonly IMapper _mapper;
         private readonly IUserOperationClaimService _userOperationClaimService;
         private readonly IOperationClaimService _operationClaimService;
+        private readonly IMailService _mailService;
         private readonly IRefreshTokenDal _refreshTokenDal;
         private readonly ITokenHelper _tokenHelper;
         private readonly UserBusinessRules _userBusinessRules;
 
         public AuthManager(IMapper mapper, UserBusinessRules userBusinessRules,
-            IUserOperationClaimService userOperationClaimService, IOperationClaimService operationClaimService, IRefreshTokenDal refreshTokenDal, ITokenHelper tokenHelper, IUserService userService, IRefreshTokenService refreshTokenService)
+            IUserOperationClaimService userOperationClaimService, IOperationClaimService operationClaimService, IRefreshTokenDal refreshTokenDal, ITokenHelper tokenHelper, IUserService userService, IRefreshTokenService refreshTokenService, IMailService mailService)
         {
             _mapper = mapper;
             _userBusinessRules = userBusinessRules;
@@ -39,6 +44,7 @@ namespace Business.Concretes
             _tokenHelper = tokenHelper;
             _userService = userService;
             _refreshTokenService = refreshTokenService;
+            _mailService = mailService;
         }
 
         public async Task<LoginResponse> Register(RegisterAuthRequest registerAuthRequest, string password, HttpContext httpContext)
@@ -135,6 +141,34 @@ namespace Business.Concretes
                 : httpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString()
                     ?? throw new BusinessException(BusinessMessages.InvalidIp);
             return ipAddress;
+        }
+
+        public async Task<bool> PasswordResetAsync(string email)
+        {
+            GetUserResponse user = await _userService.GetByMailAsync(email);
+
+            User mappedUser = _mapper.Map<User>(user);
+
+            var claims = await _userService.GetClaimsAsync(mappedUser);
+            var mapped = _mapper.Map<List<OperationClaim>>(claims);
+            var resetToken = _tokenHelper.CreateToken(mappedUser, mapped);
+
+            byte[] tokenBytes = Encoding.UTF8.GetBytes(resetToken.Token);
+            resetToken.Token = WebEncoders.Base64UrlEncode(tokenBytes);
+
+            SendPasswordResetMailRequest sendPasswordResetMailRequest = new SendPasswordResetMailRequest
+            {
+                UserId = user.Id,
+                ResetToken = resetToken.Token,
+                To = email
+            };
+            ResetTokenUserRequest userPasswordReset = _mapper.Map<ResetTokenUserRequest>(mappedUser);
+            userPasswordReset.ResetToken = resetToken.Token;
+
+            await _userService.UpdateResetTokenAsync(userPasswordReset);
+            await _mailService.SendPasswordResetMailAsync(sendPasswordResetMailRequest);
+
+            return true;
         }
     }
 }
